@@ -1,8 +1,8 @@
-FROM ubuntu:22.04
+FROM debian:12
 
 # Install dependencies
 RUN apt update && \
-    apt install -y curl wget python3 ca-certificates && \
+    apt install -y curl wget python3 ca-certificates sudo && \
     apt clean
 
 # Download and install sshx directly
