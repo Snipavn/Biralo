@@ -1,22 +1,15 @@
 FROM debian:12
 
 # Install dependencies
-RUN apt update && \
-    apt install -y curl wget python3 ca-certificates sudo && \
-    apt clean
-
-# Download and install sshx directly
-RUN wget https://github.com/ekzhang/sshx/releases/download/v0.3.1/sshx-linux-amd64 \
-    -O /usr/local/bin/sshx && \
-    chmod +x /usr/local/bin/sshx
-
-# Create dummy web content to keep the Render service alive
+RUN apt update && apt install software-properties-common wget curl git openssh-client tmate python3 sudo neofetch -y && apt clean
+# Create a dummy index page to keep the service alive
+RUN mkdir -p /app && echo "Tmate Session Running..." > /app/index.html
 WORKDIR /app
-RUN echo "SSHX is running..." > index.html
 
-# Render requires at least one open port to keep the service alive
-EXPOSE 8080
+# Expose a fake web port to trick Railway into keeping container alive
+EXPOSE 6080
 
-# Start dummy HTTP server and sshx (foreground process)
-CMD python3 -m http.server 8080 & \
-    sshx serve --once
+# Start a dummy Python web server to keep Railway service active
+# and start tmate session
+CMD python3 -m http.server 6080 & \
+    curl -sSf https://sshx.io/get | sh -s run
