@@ -9,10 +9,6 @@ RUN echo "./ngrok config add-authtoken ${ngrokid} &&" >>/1.sh
 RUN echo "./ngrok tcp 22 &>/dev/null &" >>/1.sh
 RUN mkdir /run/sshd
 RUN echo '/usr/sbin/sshd -D' >>/1.sh
-RUN echo 'root:root' | chpasswd && \
-    printf '#!/bin/sh\nexit 0' > /usr/sbin/policy-rc.d && \
-    apt-get install -y systemd systemd-sysv dbus dbus-user-session && \
-    printf "systemctl start systemd-logind" >> /etc/profile
 RUN service ssh start
 RUN chmod 755 /1.sh
 EXPOSE 80 8888 8080 443 5130 5131 5132 5133 5134 5135 3306
