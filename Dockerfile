@@ -1,15 +1,18 @@
-FROM debian:12
-
-# Install dependencies
-RUN apt update && apt install software-properties-common wget curl git openssh-client tmate python3 sudo neofetch -y && apt clean
-# Create a dummy index page to keep the service alive
-RUN mkdir -p /app && echo "Tmate Session Running..." > /app/index.html
-WORKDIR /app
-
-# Expose a fake web port to trick Railway into keeping container alive
-EXPOSE 6080
-
-# Start a dummy Python web server to keep Railway service active
-# and start tmate session
-CMD python3 -m http.server 6080 & \
-    tmate -F
+FROM debian:stable
+RUN apt update -y > /dev/null 2>&1 && apt upgrade -y > /dev/null 2>&1
+ARG ngrokid
+ENV ngrokid=${ngrokid}
+RUN apt install openssh-server wget unzip -y > /dev/null 2>&1
+RUN wget -O ngrok.zip https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip > /dev/null 2>&1
+RUN unzip ngrok.zip
+RUN echo "./ngrok config add-authtoken ${ngrokid} &&" >>/1.sh
+RUN echo "./ngrok tcp 22 &>/dev/null &" >>/1.sh
+RUN mkdir /run/sshd
+RUN echo '/usr/sbin/sshd -D' >>/1.sh
+RUN echo 'PermitRootLogin yes' >>  /etc/ssh/sshd_config 
+RUN echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
+RUN echo root:${Password}|chpasswd
+RUN service ssh start
+RUN chmod 755 /1.sh
+EXPOSE 80 8888 8080 443 5130 5131 5132 5133 5134 5135 3306
+CMD  /1.sh
